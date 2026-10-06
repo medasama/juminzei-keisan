@@ -147,7 +147,7 @@
   details.opt{border:1px solid var(--line);border-radius:4px;margin-top:14px;background:#fff;}
   details.opt > summary{cursor:pointer;padding:12px 14px;font-size:13.5px;font-weight:600;background:var(--paper);list-style:none;}
   details.opt > summary::before{content:'▶';font-size:10px;margin-right:8px;color:var(--ink-soft);display:inline-block;transition:transform .2s;}
-  details.opt[open] > summary::before{transform:rotate(90deg);}
+  details.opt[open] > summary::before{content:'▼';transform:none;}
   details.opt .inner{padding:6px 16px 14px;}
   .req{font-size:10.5px;color:var(--accent);font-weight:700;margin-left:6px;}
 
@@ -162,7 +162,7 @@
   details.howto{margin-top:14px;border-top:1px solid var(--line);padding-top:10px;}
   details.howto > summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--accent);list-style:none;}
   details.howto > summary::before{content:'▶';font-size:10px;margin-right:6px;display:inline-block;transition:transform .2s;}
-  details.howto[open] > summary::before{transform:rotate(90deg);}
+  details.howto[open] > summary::before{content:'▼';transform:none;}
   .steps{margin-top:10px;}
   .step{display:flex;gap:10px;padding:9px 0;border-bottom:1px dashed var(--ledger);}
   .step:last-child{border-bottom:none;}
@@ -378,7 +378,7 @@ function calc(i){
       const t = Math.min(i.furusato, Math.floor(g*FU.住民税上限率)) - FU.自己負担;
       if(t > 0){
         kihon = Math.floor(t*0.1);
-        const rb = i.kazei - jinteki;
+        const rb = kazeiJ - jinteki; // 住民税の課税総所得 − 人的控除差
         const mr = rb < 0 ? 0 : look(P.所得税率, rb) * FU.復興;
         const rate = 0.9 - mr;
         tokurei = Math.min(Math.floor(t*rate), Math.floor(after*FU.特例上限率));
