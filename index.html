@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>住民税かんたん計算</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@600;700&family=Noto+Sans+JP:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+  :root{
+    --ink:#16233F; --ink-soft:#3C4A66; --paper:#F5F6F2; --panel:#FFFFFF;
+    --line:#D9DCD3; --ledger:#E7EAE2; --accent:#B23A2E; --accent-soft:#F1DEDA;
+    --good:#2F6F5E; --warn-bg:#FBF2DE; --warn-text:#7A5B12;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Noto Sans JP',sans-serif;line-height:1.6;}
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 20px 80px;}
+  header{margin-bottom:28px;}
+  .eyebrow{font-size:12px;letter-spacing:.18em;color:var(--accent);font-weight:700;text-transform:uppercase;margin-bottom:6px;}
+  h1{font-family:'Zen Old Mincho',serif;font-size:clamp(24px,4vw,34px);margin:0 0 8px;font-weight:700;letter-spacing:.02em;}
+  .sub{color:var(--ink-soft);font-size:14px;max-width:680px;}
+  .grid{display:grid;grid-template-columns:1.2fr 1fr;gap:22px;align-items:start;}
+  @media (max-width:900px){.grid{grid-template-columns:1fr;}}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:24px 26px;}
+  .panel + .panel{margin-top:20px;}
+  @media (max-width:520px){.panel{padding:18px 16px;}}
+  .panel-title{font-size:13px;font-weight:700;color:var(--ink-soft);letter-spacing:.06em;margin:0 0 16px;display:flex;align-items:center;gap:8px;}
+  .panel-title::before{content:'';width:14px;height:1px;background:var(--accent);display:inline-block;}
+  .group-label{font-size:12px;font-weight:700;color:var(--ink-soft);margin:16px 0 0;padding-top:12px;border-top:1px dashed var(--line);}
+
+  .source{border:1px solid var(--line);border-radius:4px;margin-bottom:12px;overflow:hidden;}
+  .source:last-child{margin-bottom:0;}
+  .source-head{display:flex;align-items:center;gap:10px;padding:13px 14px;background:var(--paper);cursor:pointer;user-select:none;}
+  .source-head input[type=checkbox]{width:17px;height:17px;accent-color:var(--accent);}
+  .source-head .name{font-weight:600;font-size:14px;}
+  .source-body{max-height:0;overflow:hidden;transition:max-height .25s ease;}
+  .source-body.open{max-height:520px;}
+  .source-inner{padding:14px 16px 16px;border-top:1px solid var(--line);}
+
+  .row{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid var(--ledger);}
+  .row:last-child{border-bottom:none;}
+  .row label{font-size:14px;color:var(--ink);font-weight:500;flex:0 1 auto;}
+  .row .hint{display:block;font-size:11px;color:#8B8F86;font-weight:400;margin-top:3px;line-height:1.5;}
+  .field{display:flex;align-items:center;gap:6px;flex:0 0 auto;}
+  input[type=number],input[type=text],select{
+    font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;
+    border:1px solid var(--line);border-radius:3px;padding:7px 9px;width:110px;
+    text-align:right;background:#FCFCFA;color:var(--ink);
+  }
+  input[type=text]{font-family:'Noto Sans JP',sans-serif;text-align:left;width:180px;}
+  select{text-align:left;width:auto;font-family:'Noto Sans JP',sans-serif;}
+  input:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px;}
+  .unit{font-size:12px;color:var(--ink-soft);min-width:2.5em;}
+  .toggle{display:flex;gap:0;border:1px solid var(--line);border-radius:3px;overflow:hidden;}
+  .toggle button{border:none;background:#FCFCFA;color:var(--ink-soft);font-family:'Noto Sans JP',sans-serif;font-size:13px;padding:7px 14px;cursor:pointer;}
+  .toggle button.active{background:var(--ink);color:#fff;}
+  .note-box{margin-top:8px;font-size:11.5px;color:#8B8F86;line-height:1.6;background:var(--paper);border-radius:3px;padding:8px 10px;}
+
+  .dep-list{display:flex;flex-direction:column;gap:10px;margin-top:8px;}
+  .dep-item{display:grid;grid-template-columns:90px 1fr auto;gap:8px;align-items:center;background:var(--paper);border:1px solid var(--line);border-radius:3px;padding:8px 10px;}
+  .dep-item select, .dep-item input{width:100%;}
+  .dep-item .del{border:none;background:none;color:var(--accent);font-size:16px;cursor:pointer;padding:0 4px;}
+  .add-btn{margin-top:10px;font-size:13px;color:var(--accent);background:none;border:1px dashed var(--accent);border-radius:3px;padding:8px 14px;cursor:pointer;font-family:'Noto Sans JP',sans-serif;}
+  .checkline{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--ink-soft);margin-top:14px;}
+  .cta{margin-top:22px;width:100%;padding:14px;border:none;border-radius:3px;background:var(--ink);color:#fff;font-size:15px;font-weight:700;letter-spacing:.05em;cursor:pointer;font-family:'Noto Sans JP',sans-serif;}
+  .cta:hover{background:var(--accent);}
+
+  .result-panel{position:relative;overflow:hidden;}
+  @media (min-width:901px){.result-panel{position:sticky;top:16px;}}
+  .stamp{position:absolute;top:18px;right:18px;width:64px;height:64px;border-radius:50%;border:2.5px solid var(--accent);color:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Zen Old Mincho',serif;font-size:13px;font-weight:700;letter-spacing:.1em;transform:rotate(-11deg) scale(.6);opacity:0;transition:transform .45s cubic-bezier(.2,1.4,.4,1), opacity .3s;writing-mode:vertical-rl;padding:6px 0;}
+  .stamp.show{transform:rotate(-11deg) scale(1);opacity:.9;}
+  .headline{margin-bottom:18px;}
+  .headline .label{font-size:12px;color:var(--ink-soft);letter-spacing:.05em;}
+  .headline .value{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:40px;color:var(--good);line-height:1.1;margin-top:4px;}
+  .headline .value span{font-size:16px;font-weight:500;margin-left:4px;color:var(--ink-soft);}
+  .headline .monthly{font-size:12.5px;color:var(--ink-soft);margin-top:4px;}
+  .breakdown{display:flex;flex-direction:column;}
+  .breakdown .brow{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--ledger);font-size:13px;}
+  .breakdown .brow:last-child{border-bottom:none;}
+  .breakdown .bval{font-family:'JetBrains Mono',monospace;font-weight:600;}
+  .brow.clickable{cursor:pointer;user-select:none;}
+  .brow.clickable .bkey{display:flex;align-items:center;gap:5px;}
+  .brow.clickable .chevron{font-size:10px;color:var(--ink-soft);transition:transform .2s;display:inline-block;}
+  .brow.clickable.open .chevron{transform:rotate(90deg);}
+  .sub-breakdown{max-height:0;overflow:hidden;transition:max-height .25s ease;}
+  .sub-breakdown.open{max-height:320px;}
+  .sub-breakdown .srow{display:flex;justify-content:space-between;padding:6px 0 6px 16px;font-size:12px;color:var(--ink-soft);border-bottom:1px dashed var(--ledger);}
+  .sub-breakdown .srow .sval{font-family:'JetBrains Mono',monospace;}
+  .warn{margin-top:12px;background:var(--warn-bg);color:var(--warn-text);border-radius:3px;padding:10px 12px;font-size:12px;line-height:1.6;}
+  .info{margin-top:12px;background:var(--paper);color:var(--ink-soft);border-radius:3px;padding:10px 12px;font-size:12px;line-height:1.6;}
+  .note{margin-top:18px;font-size:11.5px;color:#8B8F86;line-height:1.7;}
+  .placeholder{color:#9CA098;font-size:13px;padding:30px 0;text-align:center;}
+
+  .pdf-box{margin-top:22px;padding-top:18px;border-top:1px solid var(--line);}
+  .pdf-box .row{border-bottom:none;padding:0 0 12px;}
+  .pdf-btns{display:flex;gap:8px;flex-wrap:wrap;}
+  .pdf-btn{flex:1 1 160px;padding:12px;border-radius:3px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif;letter-spacing:.04em;}
+  .pdf-btn.primary{border:none;background:var(--accent);color:#fff;}
+  .pdf-btn.secondary{border:1px solid var(--ink);background:#fff;color:var(--ink);}
+  .pdf-btn:disabled{opacity:.4;cursor:not-allowed;}
+  .pdf-status{font-size:11.5px;color:#8B8F86;margin-top:8px;min-height:1em;}
+
+  /* ===== PDF用レポート（画面外。html2pdfには中の#reportを渡す） ===== */
+  #reportHost{position:fixed;left:-10000px;top:0;}
+  #report{width:720px;background:#fff;color:#16233F;font-family:'Noto Sans JP',sans-serif;padding:8px 4px;line-height:1.55;}
+  #report .rp-top{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #16233F;padding-bottom:10px;}
+  #report .rp-eyebrow{font-size:10px;letter-spacing:.18em;color:#B23A2E;font-weight:700;}
+  #report .rp-title{font-family:'Zen Old Mincho',serif;font-size:24px;font-weight:700;margin:2px 0 0;}
+  #report .rp-meta{font-size:11px;color:#3C4A66;text-align:right;}
+  #report .rp-meta .rp-name{font-size:15px;color:#16233F;font-weight:600;margin-bottom:2px;}
+  #report .rp-headline{margin:12px 0 2px;padding:10px 16px;background:#F5F6F2;border-left:4px solid #2F6F5E;display:flex;justify-content:space-between;align-items:baseline;}
+  #report .rp-headline .l{font-size:12px;color:#3C4A66;}
+  #report .rp-headline .v{font-family:'JetBrains Mono',monospace;font-size:30px;font-weight:700;color:#2F6F5E;}
+  #report .rp-headline .v span{font-size:13px;color:#3C4A66;font-weight:500;margin-left:4px;}
+  #report .rp-headline .m{font-size:11.5px;color:#3C4A66;text-align:right;}
+  #report h3{font-size:12.5px;color:#3C4A66;letter-spacing:.06em;margin:12px 0 3px;padding-bottom:4px;border-bottom:1px solid #D9DCD3;}
+  #report table{width:100%;border-collapse:collapse;font-size:11.5px;}
+  #report td{padding:3px 4px;border-bottom:1px solid #E7EAE2;vertical-align:top;}
+  #report td.k{color:#3C4A66;width:44%;}
+  #report td.n{text-align:right;font-family:'JetBrains Mono',monospace;font-weight:600;}
+  #report tr.sub td{font-size:10.5px;color:#3C4A66;padding:3px 4px 3px 18px;border-bottom:1px dashed #E7EAE2;}
+  #report tr.sub td.n{font-weight:500;}
+  #report tr.total td{border-top:2px solid #16233F;border-bottom:none;font-weight:700;padding-top:8px;}
+  #report tr.total td.n{color:#2F6F5E;font-size:14px;}
+  #report .rp-warn{margin-top:6px;background:#FBF2DE;color:#7A5B12;padding:7px 10px;font-size:10.5px;border-radius:3px;}
+  #report .rp-info{margin-top:6px;background:#F5F6F2;color:#3C4A66;padding:7px 10px;font-size:10.5px;border-radius:3px;}
+  #report .rp-note{margin-top:8px;font-size:8px;color:#8B8F86;line-height:1.55;}
+  #report .rp-foot{margin-top:10px;padding-top:6px;border-top:1px solid #D9DCD3;font-size:10px;color:#8B8F86;display:flex;justify-content:space-between;}
+  #report .avoid{page-break-inside:avoid;break-inside:avoid;}
+
+  @media print{
+    @page{size:A4 portrait;margin:12mm;}
+    body{background:#fff;}
+    .wrap{display:none !important;}
+    #reportHost{position:static;left:auto;}
+    #report{width:auto;padding:0;}
+  }
+</style>
+<style>
+  input[type=number]{width:140px;}
+  .sub-title{font-size:12px;color:#8B8F86;margin:-8px 0 12px;}
+  .check{margin-top:12px;padding-top:10px;border-top:1px dashed var(--line);}
+  .check .crow{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-soft);padding:3px 0;}
+  .check .crow span:last-child{font-family:'JetBrains Mono',monospace;}
+  .cnt input[type=number]{width:70px;}
+  details.opt{border:1px solid var(--line);border-radius:4px;margin-top:14px;background:#fff;}
+  details.opt > summary{cursor:pointer;padding:12px 14px;font-size:13.5px;font-weight:600;background:var(--paper);list-style:none;}
+  details.opt > summary::before{content:'▶';font-size:10px;margin-right:8px;color:var(--ink-soft);display:inline-block;transition:transform .2s;}
+  details.opt[open] > summary::before{transform:rotate(90deg);}
+  details.opt .inner{padding:6px 16px 14px;}
+  .req{font-size:10.5px;color:var(--accent);font-weight:700;margin-left:6px;}
+
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:22px 0 14px;}
+  .card{background:var(--paper);border-radius:4px;padding:14px 16px;border-left:4px solid var(--line);}
+  .card.main{border-left-color:var(--good);}
+  .card .clabel{font-size:12px;color:var(--ink-soft);}
+  .card .cval{font-family:'JetBrains Mono',monospace;font-size:30px;font-weight:700;color:var(--ink);line-height:1.2;margin-top:2px;}
+  .card.main .cval{color:var(--good);}
+  .card .cval span{font-size:14px;font-weight:500;color:var(--ink-soft);margin-left:3px;}
+  .card .csub{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+  details.howto{margin-top:14px;border-top:1px solid var(--line);padding-top:10px;}
+  details.howto > summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--accent);list-style:none;}
+  details.howto > summary::before{content:'▶';font-size:10px;margin-right:6px;display:inline-block;transition:transform .2s;}
+  details.howto[open] > summary::before{transform:rotate(90deg);}
+  .steps{margin-top:10px;}
+  .step{display:flex;gap:10px;padding:9px 0;border-bottom:1px dashed var(--ledger);}
+  .step:last-child{border-bottom:none;}
+  .sno{flex:0 0 22px;height:22px;border-radius:50%;background:var(--ink);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px;}
+  .stitle{font-size:12.5px;font-weight:700;color:var(--ink);}
+  .sformula{font-family:'JetBrains Mono','Noto Sans JP',monospace;font-size:12.5px;color:var(--ink);margin-top:2px;line-height:1.6;word-break:break-word;}
+  .sformula b{color:var(--good);}
+  .snote{font-size:11.5px;color:#8B8F86;margin-top:2px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><h1>住民税かんたん計算</h1></header>
+
+  <div class="grid">
+    <div id="inputColumn">
+
+      <div class="panel">
+        <p class="panel-title">基本の数字</p>
+        <div class="row"><label>使う書類</label>
+          <div class="toggle" id="srcToggle"><button type="button" data-v="shinkoku" class="active">確定申告書</button><button type="button" data-v="gensen">源泉徴収票</button></div></div>
+        <div class="row"><label for="nenbun">年分<span class="req">必須</span><span class="hint">住民税は翌年度分（例：令和7年分 → 令和8年度）を計算します</span></label>
+          <div class="field"><select id="nenbun"><option value="7">令和7年分</option><option value="8" selected>令和8年分</option></select></div></div>
+        <div id="srcShinkoku">
+          <p class="sub-title" style="margin:4px 0 4px;">欄の番号は令和7年分以降の第一表です</p>
+          <div class="row"><label for="goukei">⑫ 合計所得金額<span class="req">必須</span><span class="hint">「所得金額等」の合計</span></label><div class="field"><input type="number" id="goukei" min="0" value="0"><span class="unit">円</span></div></div>
+          <div class="row"><label for="kazei">㉛ 課税される所得金額<span class="req">必須</span><span class="hint">「税金の計算」の一番上</span></label><div class="field"><input type="number" id="kazei" min="0" value="0"><span class="unit">円</span></div></div>
+        </div>
+        <div id="srcGensen" style="display:none;">
+          <p class="sub-title" style="margin:4px 0 4px;">給与以外の所得（年金・副業など）がある人は、確定申告書で計算してください</p>
+          <div class="row"><label for="gKyuyo">給与所得控除後の金額<span class="req">必須</span><span class="hint">源泉徴収票の上段（調整控除後）</span></label><div class="field"><input type="number" id="gKyuyo" min="0" value="0"><span class="unit">円</span></div></div>
+          <div class="row"><label for="gKoujo">所得控除の額の合計額<span class="req">必須</span><span class="hint">源泉徴収票の上段</span></label><div class="field"><input type="number" id="gKoujo" min="0" value="0"><span class="unit">円</span></div></div>
+        </div>
+        <div class="row"><label for="kKiso">基礎控除<span class="hint">自動計算。申告書㉕／源泉徴収票「基礎控除の額」と違うときだけ入力</span></label><div class="field"><input type="number" id="kKiso" min="0" value="" placeholder="自動"><span class="unit">円</span></div></div>
+        <div id="inputWarn"></div>
+      </div>
+
+      <details class="opt" id="optKoujo">
+        <summary>配偶者・扶養・障害者など・生命保険・地震保険（任意・精度が上がる）</summary>
+        <div class="inner">
+          <p class="sub-title" style="margin:6px 0 10px;">住民税は、これらの控除が所得税より小さく決められています（例：配偶者控除 38万円→33万円）。入れると、その分だけ住民税の課税所得を増やして計算します。入れなくても計算でき、ずれは多くて1万円前後です</p>
+          <p class="group-label" style="margin-top:0;border-top:none;padding-top:0;">配偶者・扶養（人数は申告書の第二表／源泉徴収票「控除対象扶養親族の数」で確認）</p>
+          <div class="row"><label for="kHaigusha">配偶者（特別）控除<span class="hint">申告書㉑㉒／源泉徴収票「配偶者（特別）控除の額」</span></label><div class="field"><input type="number" id="kHaigusha" min="0" value="0"><span class="unit">円</span></div></div>
+          <div class="row cnt"><label for="fIppan">扶養・一般（16〜18歳・23〜69歳）</label><div class="field"><input type="number" id="fIppan" min="0" value="0"><span class="unit">人</span></div></div>
+          <div class="row cnt"><label for="fTokutei">扶養・特定（19〜22歳）</label><div class="field"><input type="number" id="fTokutei" min="0" value="0"><span class="unit">人</span></div></div>
+          <div class="row cnt"><label for="fRojin">扶養・老人（同居老親以外）</label><div class="field"><input type="number" id="fRojin" min="0" value="0"><span class="unit">人</span></div></div>
+          <div class="row cnt"><label for="fDokyo">扶養・同居老親等</label><div class="field"><input type="number" id="fDokyo" min="0" value="0"><span class="unit">人</span></div></div>
+          <div class="row cnt"><label for="fNensho">16歳未満の扶養親族<span class="hint">控除はないが、住民税の非課税判定に使う</span></label><div class="field"><input type="number" id="fNensho" min="0" value="0"><span class="unit">人</span></div></div>
+
+          <p class="group-label">寡婦・ひとり親・勤労学生・障害者</p>
+          <div class="row"><label for="kKafu">寡婦・ひとり親</label><div class="field"><select id="kKafu"><option value="none">なし</option><option value="kafu">寡婦</option><option value="hm">ひとり親（母）</option><option value="hf">ひとり親（父）</option></select></div></div>
+          <div class="row"><label for="kKinro">勤労学生</label><div class="field"><select id="kKinro"><option value="0">なし</option><option value="1">あり</option></select></div></div>
+          <div class="row cnt"><label for="kShogai">障害者（一般）<span class="hint">本人・配偶者・扶養親族の合計人数</span></label><div class="field"><input type="number" id="kShogai" min="0" value="0"><span class="unit">人</span></div></div>
+          <div class="row cnt"><label for="kTokuShogai">特別障害者（同居以外）</label><div class="field"><input type="number" id="kTokuShogai" min="0" value="0"><span class="unit">人</span></div></div>
+          <div class="row cnt"><label for="kDokyoShogai">同居特別障害者</label><div class="field"><input type="number" id="kDokyoShogai" min="0" value="0"><span class="unit">人</span></div></div>
+          <div class="row"><label for="honninShogai">本人が障害者<span class="hint">本人が障害者・寡婦・ひとり親で合計所得135万円以下なら住民税は非課税</span></label><div class="field"><select id="honninShogai"><option value="0">いいえ</option><option value="1">はい</option></select></div></div>
+
+          <p class="group-label">生命保険料・地震保険料（支払保険料：申告書の第二表／源泉徴収票「生命保険料の金額の内訳」）</p>
+          <div class="row"><label for="pSeimeiShin">新生命保険料</label><div class="field"><input type="number" id="pSeimeiShin" min="0" value="0"><span class="unit">円</span></div></div>
+          <div class="row"><label for="pSeimeiKyu">旧生命保険料</label><div class="field"><input type="number" id="pSeimeiKyu" min="0" value="0"><span class="unit">円</span></div></div>
+          <div class="row"><label for="pNenkinShin">新個人年金保険料</label><div class="field"><input type="number" id="pNenkinShin" min="0" value="0"><span class="unit">円</span></div></div>
+          <div class="row"><label for="pNenkinKyu">旧個人年金保険料</label><div class="field"><input type="number" id="pNenkinKyu" min="0" value="0"><span class="unit">円</span></div></div>
+          <div class="row"><label for="pKaigo">介護医療保険料</label><div class="field"><input type="number" id="pKaigo" min="0" value="0"><span class="unit">円</span></div></div>
+          <div class="row"><label for="kJishin">地震保険料控除<span class="hint">申告書⑯／源泉徴収票「地震保険料の控除額」</span></label><div class="field"><input type="number" id="kJishin" min="0" value="0"><span class="unit">円</span></div></div>
+          <div class="check" id="hokenCheck"></div>
+        </div>
+      </details>
+
+      <details class="opt" id="optKifu">
+        <summary>ふるさと納税・住宅ローン控除（任意）</summary>
+        <div class="inner">
+          <div class="row"><label for="furusato">ふるさと納税の寄附額<span class="hint" id="furusatoHint">申告書第二表「寄附金控除に関する事項」の金額（都道府県・市区町村への寄附）</span></label><div class="field"><input type="number" id="furusato" min="0" value="0"><span class="unit">円</span></div></div>
+          <div class="row" id="kKifuRow"><label for="kKifu">㉙ 寄附金控除<span class="hint">自動計算（寄附額 − 2,000円）。ふるさと納税以外の寄附もあるときだけ入力</span></label><div class="field"><input type="number" id="kKifu" min="0" value="" placeholder="自動"><span class="unit">円</span></div></div>
+          <div class="row"><label for="loanUsed">住宅借入金等特別控除<span class="hint">所得税で引いた額。申告書㉟／源泉徴収票「住宅借入金等特別控除の額」</span></label><div class="field"><input type="number" id="loanUsed" min="0" value="0"><span class="unit">円</span></div></div>
+          <div class="row"><label for="loanKano">住宅ローン控除の控除可能額<span class="hint">申告書は計算明細書の控除額／源泉徴収票「住宅借入金等特別控除可能額」</span></label><div class="field"><input type="number" id="loanKano" min="0" value="0"><span class="unit">円</span></div></div>
+          <div class="row"><label for="loanKikan">入居した時期<span class="hint">住民税から引ける上限が変わります</span></label><div class="field"><select id="loanKikan">
+            <option value="r4">令和4年1月以降（上限：課税所得の5%・9.75万円）</option>
+            <option value="h26">平成26年4月〜令和3年12月（7%・13.65万円）</option>
+            <option value="h21">平成21年1月〜平成26年3月（5%・9.75万円）</option>
+          </select></div></div>
+        </div>
+      </details>
+
+
+      <button class="cta" id="calcBtn">計算する</button>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:11.5px;color:#8B8F86;">
+        <span id="saveStatus">入力内容はこのブラウザに自動で保存されます</span>
+        <button type="button" id="clearBtn" style="border:none;background:none;color:var(--accent);font-size:12px;cursor:pointer;text-decoration:underline;font-family:inherit;">入力をクリア</button>
+      </div>
+    </div>
+
+    <div class="panel result-panel">
+      <div class="stamp" id="stamp">計算済</div>
+      <p class="panel-title">計算結果</p>
+      <div id="resultBody"><p class="placeholder">基本の数字を入れて「計算する」を押してください</p></div>
+      <div class="pdf-box">
+        <p class="panel-title">PDFで保存</p>
+        <div class="row"><label for="atena">宛名<span class="hint">任意</span></label><div class="field"><input type="text" id="atena" placeholder="例：山田 太郎"></div></div>
+        <div class="pdf-btns">
+          <button type="button" class="pdf-btn primary" id="pdfBtn" disabled>PDFをダウンロード</button>
+          <button type="button" class="pdf-btn secondary" id="printBtn" disabled>印刷・PDF（ブラウザ機能）</button>
+        </div>
+        <div class="pdf-status" id="pdfStatus">計算後にPDFを保存できます。</div>
+      </div>
+    </div>
+  </div>
+
+  <p class="note" id="disclaimerText">確定申告書（または源泉徴収票から求めた）所得税の課税所得に、住民税では所得税より小さくなる控除の分（基礎・配偶者・扶養・寡婦・ひとり親・勤労学生・障害者・生命保険料・地震保険料・寄附金の各控除）を足し戻して住民税の課税所得を求め、10%（市民税6%・県民税4%）を掛けて調整控除・税額控除を差し引き、均等割（兵庫県内5,800円）を加えた概算です。申告年分の翌年度の住民税を計算します。特定親族特別控除、配当控除、ふるさと納税以外の寄附金税額控除、分離課税の所得は反映していません。源泉徴収票から計算する場合、ふるさと納税はワンストップ特例を使った前提です。未成年者の非課税判定は反映していません。市民税・県民税を別々に端数処理するため、実際の額と数百円ずれることがあります。正式な額は住民税決定通知書でご確認ください。</p>
+</div>
+
+<div id="reportHost"><div id="report"></div></div>
+
+<script>
+const OFFICE_NAME = '';
+const P = {
+  // 所得税の基礎控除（申告年分別）：[合計所得の上限, 控除額]
+  基礎控除_所得税: {
+    7: [[1320000,950000],[3360000,880000],[4890000,680000],[6550000,630000],[23500000,580000],[24000000,480000],[24500000,320000],[25000000,160000],[Infinity,0]],
+    8: [[4890000,1040000],[6550000,670000],[23500000,620000],[24000000,480000],[24500000,320000],[25000000,160000],[Infinity,0]],
+  },
+  基礎控除_住民税: [[24000000,430000],[24500000,290000],[25000000,150000],[Infinity,0]],
+  配偶者: { 所得税: { 一般:{c900:380000,c950:260000,c1000:130000}, 老人:{c900:480000,c950:320000,c1000:160000} },
+           住民税: { 一般:{c900:330000,c950:220000,c1000:110000}, 老人:{c900:380000,c950:260000,c1000:130000} } },
+  扶養: { 所得税:{ippan:380000,tokutei:630000,rojin:480000,dokyo:580000}, 住民税:{ippan:330000,tokutei:450000,rojin:380000,dokyo:450000} },
+  人的控除差: { 基礎:50000, 配偶者一般:50000, 配偶者老人:100000, ippan:50000, tokutei:180000, rojin:100000, dokyo:130000 },
+  生命: {
+    所得税: { 新: [[20000,1,0],[40000,0.5,10000],[80000,0.25,20000],[Infinity,0,40000]], 旧: [[25000,1,0],[50000,0.5,12500],[100000,0.25,25000],[Infinity,0,50000]], 併用上限: 40000, 合計上限: 120000 },
+    住民税: { 新: [[12000,1,0],[32000,0.5,6000],[56000,0.25,14000],[Infinity,0,28000]], 旧: [[15000,1,0],[40000,0.5,7500],[70000,0.25,17500],[Infinity,0,35000]], 併用上限: 28000, 合計上限: 70000 },
+  },
+  所得税率: [[1949000,0.05],[3299000,0.10],[6949000,0.20],[8999000,0.23],[17999000,0.33],[39999000,0.40],[Infinity,0.45]],
+  非課税: { 一人当たり:350000, 加算:100000, 均等割加算:210000, 所得割加算:320000 },
+  均等割: 5800, 税率: 0.10,
+  ふるさと: { 自己負担:2000, 所得税上限率:0.40, 住民税上限率:0.30, 特例上限率:0.20, 復興:1.021 },
+  住宅ローン: { r4:{率:0.05,上限:97500}, h26:{率:0.07,上限:136500}, h21:{率:0.05,上限:97500} },
+  寡婦等: { none:[0,0], kafu:[270000,260000], hm:[350000,300000], hf:[350000,300000] },
+  障害者等: { 勤労学生:[270000,260000], 障害者:[270000,260000], 特別:[400000,300000], 同居特別:[750000,530000] },
+  人的控除差_追加: { kafu:10000, hm:50000, hf:10000, 勤労学生:10000, 障害者:10000, 特別:100000, 同居特別:220000 },
+  非課税_135万: 1350000,
+};
+const look = (t, v) => t.find(([u]) => v <= u)[1];
+const chopSen = e => Math.floor(e/1000)*1000;
+const floor100 = e => Math.floor(e/100)*100;
+function seimeiOne(x, t){ if(x<=0) return 0; const [, r, add] = t.find(([u]) => x <= u); return Math.ceil(x*r + add); }
+function seimeiKubun(s, k, t){ const a = seimeiOne(s,t.新), b = seimeiOne(k,t.旧); return (s>0&&k>0) ? Math.max(b, Math.min(a+b, t.併用上限)) : a+b; }
+function seimei(h, kind){ const t = P.生命[kind]; return Math.min(seimeiKubun(h.sShin,h.sKyu,t) + seimeiKubun(h.nShin,h.nKyu,t) + seimeiOne(h.kaigo,t.新), t.合計上限); }
+function col(g){ return g<=9000000 ? 'c900' : g<=9500000 ? 'c950' : g<=10000000 ? 'c1000' : null; }
+function haigusha(amount, g){
+  const c = col(g); if(!c || amount<=0) return { j:0, kubun:null };
+  if(amount === P.配偶者.所得税.老人[c]) return { j:P.配偶者.住民税.老人[c], kubun:'老人' };
+  if(amount === P.配偶者.所得税.一般[c]) return { j:P.配偶者.住民税.一般[c], kubun:'一般' };
+  return { j: Math.min(amount, P.配偶者.住民税.一般[c]), kubun:'特別' };
+}
+
+function calc(i){
+  const notes = [];
+  const g = i.goukei;
+  // 控除の差（所得税 − 住民税）
+  const kisoT = i.kKiso != null ? i.kKiso : look(P.基礎控除_所得税[i.nenbun], g);
+  const kisoJ = look(P.基礎控除_住民税, g);
+  const hai = haigusha(i.kHaigusha, g);
+  const F = i.fuyo, FT = P.扶養.所得税, FJ = P.扶養.住民税;
+  const fuyoSa = F.ippan*(FT.ippan-FJ.ippan) + F.tokutei*(FT.tokutei-FJ.tokutei) + F.rojin*(FT.rojin-FJ.rojin) + F.dokyo*(FT.dokyo-FJ.dokyo);
+  const seimeiT = seimei(i.hoken,'所得税'), seimeiJ = seimei(i.hoken,'住民税');
+  const jishinJ = Math.min(Math.ceil(i.kJishin/2), 25000);
+  const FU = P.ふるさと;
+  const kifuT = i.mode==='gensen' ? 0 : (i.kKifu != null ? i.kKifu : (i.furusato > FU.自己負担 ? Math.max(0, Math.min(i.furusato, Math.floor(g*FU.所得税上限率)) - FU.自己負担) : 0));
+  const SG = P.障害者等;
+  const shogaiT = (i.kinro?SG.勤労学生[0]:0) + i.shogai*SG.障害者[0] + i.tokuShogai*SG.特別[0] + i.dokyoShogai*SG.同居特別[0];
+  const shogaiJ = (i.kinro?SG.勤労学生[1]:0) + i.shogai*SG.障害者[1] + i.tokuShogai*SG.特別[1] + i.dokyoShogai*SG.同居特別[1];
+  // 控除ごとの [所得税の額, 住民税の額]
+  const pairs = {
+    基礎控除: [kisoT, kisoJ],
+    '配偶者（特別）控除': [i.kHaigusha, Math.min(i.kHaigusha, hai.j)],
+    扶養控除: [F.ippan*FT.ippan + F.tokutei*FT.tokutei + F.rojin*FT.rojin + F.dokyo*FT.dokyo, F.ippan*FJ.ippan + F.tokutei*FJ.tokutei + F.rojin*FJ.rojin + F.dokyo*FJ.dokyo],
+    生命保険料控除: [seimeiT, seimeiJ],
+    地震保険料控除: [i.kJishin, jishinJ],
+    '寡婦・ひとり親控除': P.寡婦等[i.kafu],
+    '勤労学生・障害者控除': [shogaiT, shogaiJ],
+    寄附金控除: [kifuT, 0],
+  };
+  const sa = {};
+  for(const [k,[t,j]] of Object.entries(pairs)) sa[k] = Math.max(0, t - j);
+  const saTotal = Object.values(sa).reduce((a,b)=>a+b,0);
+  const kazeiJ = chopSen(i.kazei + saTotal);
+
+  // 非課税判定
+  const ninzu = 1 + (hai.kubun==='一般'||hai.kubun==='老人' ? 1 : 0) + F.ippan + F.tokutei + F.rojin + F.dokyo + F.nensho;
+  const NK = P.非課税, ari = ninzu > 1;
+  const hi135 = (i.kafu !== 'none' || i.honninShogai) && g <= P.非課税_135万;
+  const kintouHi = hi135 || g <= NK.一人当たり*ninzu + NK.加算 + (ari ? NK.均等割加算 : 0);
+  const wariHi = kintouHi || g <= NK.一人当たり*ninzu + NK.加算 + (ari ? NK.所得割加算 : 0);
+
+  // 人的控除差（調整控除・ふるさと特例分の税率判定用）
+  const D = P.人的控除差;
+  let jinteki = g <= 25000000 ? D.基礎 : 0;
+  if(hai.kubun==='一般') jinteki += D.配偶者一般;
+  if(hai.kubun==='老人') jinteki += D.配偶者老人;
+  jinteki += F.ippan*D.ippan + F.tokutei*D.tokutei + F.rojin*D.rojin + F.dokyo*D.dokyo;
+  const DA = P.人的控除差_追加;
+  jinteki += (DA[i.kafu]||0) + (i.kinro?DA.勤労学生:0) + i.shogai*DA.障害者 + i.tokuShogai*DA.特別 + i.dokyoShogai*DA.同居特別;
+
+  let w0=0, chosei=0, loanJ=0, kihon=0, tokurei=0, shinkokuT=0, wari=0;
+  if(!wariHi){
+    w0 = Math.round(kazeiJ * P.税率);
+    if(g <= 25000000){
+      const base = kazeiJ <= 2000000 ? Math.min(jinteki, kazeiJ) : Math.max(jinteki - (kazeiJ - 2000000), 50000);
+      chosei = Math.min(w0, Math.round(base*0.05));
+    }
+    const after = w0 - chosei;
+    const LR = P.住宅ローン[i.loanKikan] || P.住宅ローン.r4;
+    loanJ = Math.min(after, Math.max(0, i.loanKano - i.loanUsed), Math.min(Math.floor(i.kazei*LR.率), LR.上限));
+    if(i.furusato > FU.自己負担){
+      const t = Math.min(i.furusato, Math.floor(g*FU.住民税上限率)) - FU.自己負担;
+      if(t > 0){
+        kihon = Math.floor(t*0.1);
+        const rb = i.kazei - jinteki;
+        const mr = rb < 0 ? 0 : look(P.所得税率, rb) * FU.復興;
+        const rate = 0.9 - mr;
+        tokurei = Math.min(Math.floor(t*rate), Math.floor(after*FU.特例上限率));
+        // 源泉徴収票（ワンストップ特例）の場合：所得税分も住民税から引く（申告特例控除）
+        if(i.mode==='gensen' && rate > 0) shinkokuT = Math.floor(tokurei * mr / rate);
+      }
+    }
+    wari = Math.max(0, after - loanJ - kihon - tokurei - shinkokuT);
+  }
+  const kintou = kintouHi ? 0 : P.均等割;
+  const juminzei = floor100(wari) + kintou;
+  if(kintouHi && !hi135) notes.push('合計所得が住民税の非課税基準以下のため、住民税は0円です。');
+  else if(wariHi) notes.push('住民税は所得割が非課税で、均等割のみです。');
+  if(hi135) notes.push('本人が障害者・寡婦・ひとり親で合計所得が135万円以下のため、住民税は非課税です。');
+  if(i.mode==='gensen' && i.furusato > FU.自己負担) notes.push('ふるさと納税は、ワンストップ特例を使った場合として計算しています（所得税の分も住民税から引かれます）。');
+
+  return { sa, pairs, saTotal, kazeiJ, w0, chosei, loanJ, kihon, tokurei, shinkokuT, kintou, juminzei, seimeiT, kisoT, kifuT, notes };
+}
+
+// ===== UI =====
+const $ = id => document.getElementById(id);
+const yen = v => Math.round(v).toLocaleString('ja-JP');
+const man = v => (Math.round(v/1000)/10).toLocaleString('ja-JP', { minimumFractionDigits:1, maximumFractionDigits:1 });
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const n = id => Math.max(0, Math.floor(parseFloat($(id).value)||0));
+const nOrNull = id => $(id).value.trim()==='' ? null : n(id);
+const srcMode = () => $('srcToggle').querySelector('.active').dataset.v;
+function applySrcMode(){
+  const g = srcMode()==='gensen';
+  $('srcShinkoku').style.display = g ? 'none' : 'block';
+  $('srcGensen').style.display = g ? 'block' : 'none';
+  $('kKifuRow').style.display = g ? 'none' : 'flex';
+  $('furusatoHint').textContent = g ? 'ワンストップ特例で寄附した合計額（都道府県・市区町村への寄附）' : '申告書第二表「寄附金控除に関する事項」の金額（都道府県・市区町村への寄附）';
+}
+$('srcToggle').addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  [...$('srcToggle').children].forEach(x=>x.classList.toggle('active', x===b));
+  applySrcMode(); liveCheck();
+});
+function readInputs(){
+  return {
+    mode: srcMode(), nenbun: parseInt($('nenbun').value), kKiso: nOrNull('kKiso'),
+    goukei: srcMode()==='gensen' ? n('gKyuyo') : n('goukei'),
+    kazei: srcMode()==='gensen' ? chopSen(Math.max(0, n('gKyuyo') - n('gKoujo'))) : n('kazei'),
+    gKyuyo: n('gKyuyo'), gKoujo: n('gKoujo'),
+    kafu: $('kKafu').value, kinro: $('kKinro').value==='1', shogai: n('kShogai'), tokuShogai: n('kTokuShogai'), dokyoShogai: n('kDokyoShogai'), honninShogai: $('honninShogai').value==='1',
+    loanKikan: $('loanKikan').value,
+    kHaigusha: n('kHaigusha'), fuyo: { ippan:n('fIppan'), tokutei:n('fTokutei'), rojin:n('fRojin'), dokyo:n('fDokyo'), nensho:n('fNensho') },
+    hoken: { sShin:n('pSeimeiShin'), sKyu:n('pSeimeiKyu'), nShin:n('pNenkinShin'), nKyu:n('pNenkinKyu'), kaigo:n('pKaigo') }, kJishin: n('kJishin'),
+    furusato: n('furusato'), kKifu: nOrNull('kKifu'), loanUsed: n('loanUsed'), loanKano: n('loanKano'),
+  };
+}
+function liveCheck(){
+  const i = readInputs();
+  $('hokenCheck').innerHTML = `<div class="crow"><span>⑮ 生命保険料控除（計算値）→ 申告書と一致するか確認</span><span>${yen(seimei(i.hoken,'所得税'))} 円</span></div>`;
+  const kisoAuto = look(P.基礎控除_所得税[i.nenbun], i.goukei);
+  $('kKiso').placeholder = `自動：${yen(kisoAuto)}`;
+  const kifuAuto = i.furusato > 2000 ? Math.max(0, Math.min(i.furusato, Math.floor(i.goukei*0.4)) - 2000) : 0;
+  $('kKifu').placeholder = `自動：${yen(kifuAuto)}`;
+  let w = '';
+  if(i.mode==='shinkoku' && i.kazei > i.goukei && i.goukei > 0) w = '⚠ 課税される所得金額（㉛）が合計所得金額（⑫）より大きくなっています。2つを逆に入れていないか確認してください。';
+  else if(i.mode==='gensen' && i.gKoujo > 0 && i.gKyuyo > 0 && i.gKoujo > i.gKyuyo) w = '⚠ 所得控除の合計が給与所得控除後の金額より大きいため、課税所得は0円になります。数字を確認してください。';
+  $('inputWarn').innerHTML = w ? `<div class="warn">${w}</div>` : '';
+}
+document.addEventListener('input', liveCheck);
+document.addEventListener('change', liveCheck);
+
+function nendo(i){ return `令和${i.nenbun+1}年度`; }
+function breakdownHTML(i, r, forReport){
+  const saRows = Object.entries(r.sa).filter(([,v])=>v>0).map(([k,v])=>`<tr class="sub"><td>＋ ${k}（所得税 ${yen(r.pairs[k][0])} → 住民税 ${yen(r.pairs[k][1])}）</td><td class="n">${yen(v)} 円</td></tr>`).join('');
+  return `<table class="${forReport?'':'cmp'}" style="width:100%;border-collapse:collapse;">
+    <tr><td class="k">課税される所得金額（所得税）${i.mode==='gensen'?'※源泉徴収票から計算':''}</td><td class="n">${yen(i.kazei)} 円</td></tr>
+    ${saRows}
+    <tr><td class="k">住民税の課税所得</td><td class="n">${yen(r.kazeiJ)} 円</td></tr>
+    <tr><td class="k">所得割（10%）</td><td class="n">${yen(r.w0)} 円</td></tr>
+    ${r.chosei ? `<tr class="sub"><td>− 調整控除</td><td class="n">${yen(r.chosei)} 円</td></tr>` : ''}
+    ${r.loanJ ? `<tr class="sub"><td>− 住宅ローン控除</td><td class="n">${yen(r.loanJ)} 円</td></tr>` : ''}
+    ${r.kihon+r.tokurei+r.shinkokuT ? `<tr class="sub"><td>− ふるさと納税（基本分 ${yen(r.kihon)}＋特例分 ${yen(r.tokurei)}${r.shinkokuT?`＋申告特例分 ${yen(r.shinkokuT)}`:''}）</td><td class="n">${yen(r.kihon+r.tokurei+r.shinkokuT)} 円</td></tr>` : ''}
+    <tr class="sub"><td>＋ 均等割</td><td class="n">${yen(r.kintou)} 円</td></tr>
+    <tr class="total"><td>住民税 年額（${nendo(i)}）</td><td class="n">${yen(r.juminzei)} 円</td></tr>
+  </table>`;
+}
+function stepsHTML(i, r){
+  const saList = Object.entries(r.sa).filter(([,v])=>v>0);
+  const saText = saList.length
+    ? saList.map(([k,v])=>`・${k}：所得税 ${yen(r.pairs[k][0])} → 住民税 ${yen(r.pairs[k][1])}（＋${yen(v)}）`).join('<br>')
+    : 'なし';
+  const furu = r.kihon + r.tokurei + r.shinkokuT;
+  const kojo = r.chosei + r.loanJ + furu;
+  const kojoParts = [['調整控除', r.chosei], ['住宅ローン控除', r.loanJ], ['ふるさと納税', furu]].filter(([,v])=>v>0);
+  const wari = r.juminzei - r.kintou;
+  const st = (no, title, formula, note='') => `
+    <div class="step"><div class="sno">${no}</div><div class="sbody">
+      <div class="stitle">${title}</div><div class="sformula">${formula}</div>${note ? `<div class="snote">${note}</div>` : ''}
+    </div></div>`;
+  let h = '';
+  const src = i.mode==='gensen' ? `<br>所得税の課税所得 ＝ 給与所得控除後の金額 ${yen(i.gKyuyo)} − 所得控除の合計 ${yen(i.gKoujo)}（千円未満切り捨て）` : '';
+  h += st(1, '住民税の課税所得', `所得税の課税所得 ${i.mode==='gensen'?'':'㉛ '}${yen(i.kazei)} ＋ 住民税で控除が小さくなる分 ${yen(r.saTotal)} ＝ <b>${yen(r.kazeiJ)}円</b>`,
+          `住民税は控除が所得税より小さいため、その分だけ課税所得が大きくなります（千円未満切り捨て）<br>${saText}${r.sa['寄附金控除'] ? '<br>※寄附金は、住民税では控除ではなく③で税額から直接引きます' : ''}${src}`);
+  h += st(2, '所得割（税率10%）', `${yen(r.kazeiJ)} × 10% ＝ <b>${yen(r.w0)}円</b>`);
+  h += st(3, '税額から引くもの', kojo ? `${kojoParts.map(([k,v])=>`${k} ${yen(v)}`).join(' ＋ ')} ＝ <b>${yen(kojo)}円</b>` : 'なし',
+          furu ? `ふるさと納税の内訳：基本分 ${yen(r.kihon)}＋特例分 ${yen(r.tokurei)}${r.shinkokuT ? `＋申告特例分 ${yen(r.shinkokuT)}（ワンストップ特例）` : ''}` : '');
+  h += st(4, '住民税 年額', `所得割 ${yen(wari)} ＋ 均等割 ${yen(r.kintou)} ＝ <b>${yen(r.juminzei)}円</b>`, `所得割 ＝ ${yen(r.w0)} − ${yen(kojo)}（100円未満切り捨て）`);
+  return h;
+}
+function render(i, r){
+  const cards = [
+    `<div class="card main"><div class="clabel">住民税 年額（${nendo(i)}）</div><div class="cval">${yen(r.juminzei)}<span>円</span></div><div class="csub">月あたり 約${yen(Math.round(r.juminzei/12/100)*100)}円</div></div>`,
+  ];
+  $('resultBody').innerHTML = `
+    <div class="cards">${cards.join('')}</div>
+    ${r.notes.map(x=>`<div class="info">${esc(x)}</div>`).join('')}
+    <details class="howto"><summary>計算方法を見る</summary><div class="steps">${stepsHTML(i, r)}</div></details>`;
+}
+function todayLabel(d=new Date()){ return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`; }
+function buildReport(i, r){
+  const atena = $('atena').value.trim();
+  $('report').innerHTML = `
+    <div class="rp-top">
+      <div><div class="rp-eyebrow">RESIDENT TAX</div><div class="rp-title">住民税 計算結果</div></div>
+      <div class="rp-meta">${atena ? `<div class="rp-name">${esc(atena)} 様</div>` : ''}令和${i.nenbun}年分 ${i.mode==='gensen'?'源泉徴収票':'確定申告書'}より／作成日：${todayLabel()}</div>
+    </div>
+    <div class="rp-headline">
+      <div><div class="l">住民税 年額（${nendo(i)}・概算）</div><div class="v">${yen(r.juminzei)}<span>円</span></div></div>
+      <div class="m">月あたり 約${yen(Math.round(r.juminzei/12/100)*100)}円</div>
+    </div>
+    <div class="avoid"><h3>計算の内訳</h3>${breakdownHTML(i, r, true)}</div>
+    ${r.notes.map(x=>`<div class="rp-info avoid">${esc(x)}</div>`).join('')}
+    <div class="rp-note">${esc($('disclaimerText').textContent.trim())}</div>
+    <div class="rp-foot"><span>${esc(OFFICE_NAME)}</span><span>住民税かんたん計算</span></div>`;
+}
+function run(){
+  const i = readInputs(), r = calc(i);
+  render(i, r); buildReport(i, r);
+  $('pdfBtn').disabled = false; $('printBtn').disabled = false;
+}
+$('calcBtn').addEventListener('click', ()=>{
+  run();
+  const s = $('stamp'); s.classList.remove('show'); void s.offsetWidth; s.classList.add('show');
+  if(window.innerWidth <= 900) $('resultBody').scrollIntoView({ behavior:'smooth', block:'start' });
+});
+$('atena').addEventListener('input', ()=>{ if(!$('pdfBtn').disabled) run(); });
+function pdfFileName(){
+  const d=new Date(), ymd=`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+  const a=$('atena').value.trim().replace(/[\\/:*?"<>|\s]/g,'');
+  return `住民税計算_${a?a+'様_':''}${ymd}.pdf`;
+}
+$('pdfBtn').addEventListener('click', async ()=>{
+  run();
+  const btn=$('pdfBtn'), st=$('pdfStatus');
+  if(typeof html2pdf==='undefined'){ st.textContent='PDF作成ライブラリを読み込めませんでした。右の「印刷・PDF」をお使いください。'; return; }
+  btn.disabled=true; st.textContent='PDFを作成しています…';
+  try{
+    if(document.fonts&&document.fonts.ready) await document.fonts.ready;
+    await html2pdf().set({ margin:[12,12,12,12], filename:pdfFileName(), image:{type:'jpeg',quality:0.98},
+      html2canvas:{scale:2,useCORS:true,scrollX:0,scrollY:0,backgroundColor:'#ffffff'},
+      jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}, pagebreak:{mode:['css','legacy'],avoid:'.avoid'} }).from($('report')).save();
+    st.textContent='PDFを保存しました。';
+  }catch(e){ console.error(e); st.textContent='PDFの作成に失敗しました。右の「印刷・PDF」をお使いください。'; }
+  finally{ btn.disabled=false; }
+});
+$('printBtn').addEventListener('click', ()=>{
+  run();
+  const prev=document.title; document.title=pdfFileName().replace(/\.pdf$/,'');
+  window.addEventListener('afterprint', ()=>{ document.title=prev; }, { once:true });
+  window.print();
+});
+liveCheck();
+
+// ===== 年齢プルダウン・数値欄の全選択・入力内容の保存（このブラウザのみ） =====
+function ageOptions(min, max, sel){ let h=''; for(let a=min;a<=max;a++) h+=`<option value="${a}"${a==sel?' selected':''}>${a}</option>`; return h; }
+document.querySelectorAll('select.age-select').forEach(el=>{ el.innerHTML = ageOptions(+el.dataset.min, +el.dataset.max, +el.dataset.default); });
+document.addEventListener('focusin', e=>{ const el=e.target; if(el.matches && el.matches('input[type=number]')){ el.dataset.justFocused='1'; try{ el.select(); }catch(_){} } });
+document.addEventListener('mouseup', e=>{ const el=e.target; if(el.matches && el.matches('input[type=number]') && el.dataset.justFocused){ e.preventDefault(); delete el.dataset.justFocused; } });
+document.addEventListener('focusout', e=>{ if(e.target.dataset) delete e.target.dataset.justFocused; });
+
+const STORE_KEY = 'juminzei-keisan:v1';
+const STORE_TOGGLES = ['srcToggle'];
+function snapshot(){
+  const fields = {};
+  document.querySelectorAll('#inputColumn input[id], #inputColumn select[id], #atena').forEach(el=>{ fields[el.id] = el.type==='checkbox' ? el.checked : el.value; });
+  const toggles = {};
+  STORE_TOGGLES.forEach(id=>{ const a = document.getElementById(id).querySelector('.active'); if(a) toggles[id] = a.dataset.v; });
+  return { fields, toggles, savedAt: Date.now() };
+}
+function saveState(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(snapshot())); }catch(e){} }
+function restoreState(){
+  let st=null; try{ st = JSON.parse(localStorage.getItem(STORE_KEY)||'null'); }catch(e){}
+  if(!st) return;
+  Object.entries(st.fields||{}).forEach(([id,v])=>{
+    const el = document.getElementById(id); if(!el) return;
+    if(el.type==='checkbox') el.checked = !!v; else el.value = v;
+    el.dispatchEvent(new Event('input', { bubbles:true }));
+  });
+  Object.entries(st.toggles||{}).forEach(([id,v])=>{ const b = document.getElementById(id) && document.getElementById(id).querySelector(`button[data-v="${v}"]`); if(b) b.click(); });
+  if(st.savedAt){ const d=new Date(st.savedAt); document.getElementById('saveStatus').textContent = `前回の入力を復元しました（${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}保存）`; }
+}
+let saveTimer=null; const scheduleSave=()=>{ clearTimeout(saveTimer); saveTimer=setTimeout(saveState,300); };
+document.addEventListener('input', scheduleSave); document.addEventListener('change', scheduleSave);
+document.addEventListener('click', e=>{ if(e.target.closest('.toggle button')) scheduleSave(); });
+window.addEventListener('pagehide', saveState);
+document.getElementById('clearBtn').addEventListener('click', ()=>{
+  if(!confirm('入力内容をすべて消して初期状態に戻しますか？')) return;
+  try{ localStorage.removeItem(STORE_KEY); }catch(e){}
+  window.removeEventListener('pagehide', saveState); location.reload();
+});
+restoreState();
+// 任意欄に値が入っていれば、その折りたたみを開いておく
+document.querySelectorAll('details.opt').forEach(d=>{
+  if([...d.querySelectorAll('input')].some(el=>el.value.trim()!=='' && el.value!=='0')) d.open = true;
+});
+applySrcMode(); liveCheck();
+</script>
+</body>
+</html>
