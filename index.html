@@ -203,30 +203,39 @@
       <details class="opt" id="optKoujo">
         <summary>配偶者・扶養・障害者など・生命保険・地震保険（任意・精度が上がる）</summary>
         <div class="inner">
-          <p class="sub-title" style="margin:6px 0 10px;">住民税は、これらの控除が所得税より小さく決められています（例：配偶者控除 38万円→33万円）。入れると、その分だけ住民税の課税所得を増やして計算します。入れなくても計算でき、ずれは多くて1万円前後です</p>
-          <p class="group-label" style="margin-top:0;border-top:none;padding-top:0;">配偶者・扶養（人数は申告書の第二表／源泉徴収票「控除対象扶養親族の数」で確認）</p>
-          <div class="row"><label for="kHaigusha">配偶者（特別）控除<span class="hint">申告書㉑㉒／源泉徴収票「配偶者（特別）控除の額」</span></label><div class="field"><input type="number" id="kHaigusha" min="0" value="0"><span class="unit">円</span></div></div>
-          <div class="row cnt"><label for="fIppan">扶養・一般（16〜18歳・23〜69歳）</label><div class="field"><input type="number" id="fIppan" min="0" value="0"><span class="unit">人</span></div></div>
-          <div class="row cnt"><label for="fTokutei">扶養・特定（19〜22歳）</label><div class="field"><input type="number" id="fTokutei" min="0" value="0"><span class="unit">人</span></div></div>
-          <div class="row cnt"><label for="fRojin">扶養・老人（同居老親以外）</label><div class="field"><input type="number" id="fRojin" min="0" value="0"><span class="unit">人</span></div></div>
-          <div class="row cnt"><label for="fDokyo">扶養・同居老親等</label><div class="field"><input type="number" id="fDokyo" min="0" value="0"><span class="unit">人</span></div></div>
-          <div class="row cnt"><label for="fNensho">16歳未満の扶養親族<span class="hint">控除はないが、住民税の非課税判定に使う</span></label><div class="field"><input type="number" id="fNensho" min="0" value="0"><span class="unit">人</span></div></div>
+          <p class="sub-title" style="margin:6px 0 10px;">住民税は、これらの控除が所得税より小さく決められています（例：配偶者控除 38万円→33万円）。入れると、その分だけ住民税の課税所得を増やして計算します。入れなくても計算でき、ずれは多くて1万円前後です。<span data-s="欄の名前は確定申告書（第一表・第二表）に合わせています" data-g="欄の名前は源泉徴収票に合わせています。上から順に転記してください"></span></p>
 
-          <p class="group-label">寡婦・ひとり親・勤労学生・障害者</p>
-          <div class="row"><label for="kKafu">寡婦・ひとり親</label><div class="field"><select id="kKafu"><option value="none">なし</option><option value="kafu">寡婦</option><option value="hm">ひとり親（母）</option><option value="hf">ひとり親（父）</option></select></div></div>
+          <p class="group-label" style="margin-top:0;border-top:none;padding-top:0;">配偶者</p>
+          <div class="row"><label for="kHaigusha">配偶者（特別）控除の額<span class="hint" data-s="第一表 ㉑㉒「配偶者（特別）控除」" data-g="「配偶者（特別）控除の額」"></span></label><div class="field"><input type="number" id="kHaigusha" min="0" value="0"><span class="unit">円</span></div></div>
+          <div class="row"><label for="haiShotoku">配偶者の合計所得<span class="hint" data-s="第一表 下段「配偶者の合計所得金額」（57番）。空欄でも計算できます" data-g="下段「配偶者の合計所得」。空欄でも計算できます"></span><span class="hint">配偶者控除か配偶者特別控除かの区別と、非課税の判定に使います</span></label><div class="field"><input type="number" id="haiShotoku" min="0" value="" placeholder="空欄可"><span class="unit">円</span></div></div>
+          <div class="row"><label for="haiRojin">配偶者が70歳以上<span class="hint" data-s="第二表「配偶者や親族に関する事項」の生年月日で、年末に70歳以上か" data-g="「（源泉）控除対象配偶者の有無等」の「老人」欄に＊があるか"></span></label><div class="field"><select id="haiRojin"><option value="0">いいえ</option><option value="1">はい</option></select></div></div>
+
+          <p class="group-label">扶養親族<span class="hint" style="display:block;font-weight:400;" data-s="第二表「配偶者や親族に関する事項」の生年月日から、年末時点の年齢で数えてください" data-g="「控除対象扶養親族の数（配偶者を除く）」欄の数字を左から転記"></span></p>
+          <div class="row cnt"><label for="fTokutei">特定（19〜22歳）<span class="hint" data-s="" data-g="「特定」欄"></span></label><div class="field"><input type="number" id="fTokutei" min="0" value="0"><span class="unit">人</span></div></div>
+          <div class="row cnt"><label for="fRojinAll">老人（70歳以上）<span class="hint" data-s="同居している父母・祖父母も含めた人数" data-g="「老人」欄の右側の数字（「内」も含めた人数）"></span></label><div class="field"><input type="number" id="fRojinAll" min="0" value="0"><span class="unit">人</span></div></div>
+          <div class="row cnt"><label for="fDokyoUchi">うち同居老親等<span class="hint" data-s="上のうち、本人か配偶者の父母・祖父母で、いつも同居している人" data-g="「老人」欄の「内」の数字"></span></label><div class="field"><input type="number" id="fDokyoUchi" min="0" value="0"><span class="unit">人</span></div></div>
+          <div class="row cnt"><label for="fIppan">その他（16〜18歳・23〜69歳）<span class="hint" data-s="" data-g="「その他」欄"></span></label><div class="field"><input type="number" id="fIppan" min="0" value="0"><span class="unit">人</span></div></div>
+          <div class="row"><label for="kTokushin">特定親族特別控除の額<span class="hint" data-s="第一表 ㉔。19〜22歳で所得58万円超の子など" data-g="「特定親族特別控除の額」"></span></label><div class="field"><input type="number" id="kTokushin" min="0" value="0"><span class="unit">円</span></div></div>
+          <div class="row cnt"><label for="fNensho">16歳未満<span class="hint" data-s="第二表の16歳未満の扶養親族。控除はないが、非課税の判定に使います" data-g="「16歳未満扶養親族の数」。控除はないが、非課税の判定に使います"></span></label><div class="field"><input type="number" id="fNensho" min="0" value="0"><span class="unit">人</span></div></div>
+
+          <p class="group-label">本人の事項・障害者<span class="hint" style="display:block;font-weight:400;" data-s="第二表「本人に関する事項」のチェックと、扶養親族欄の「障害者」の印で確認" data-g="源泉徴収票の下段「本人が障害者」「寡婦」「ひとり親」「勤労学生」の＊と、「障害者の数（本人を除く）」欄"></span></p>
+          <div class="row"><label for="kKafu">寡婦・ひとり親<span class="hint">ひとり親は、住民税の控除額が母・父で違うため選んでください</span></label><div class="field"><select id="kKafu"><option value="none">なし</option><option value="kafu">寡婦</option><option value="hm">ひとり親（母）</option><option value="hf">ひとり親（父）</option></select></div></div>
           <div class="row"><label for="kKinro">勤労学生</label><div class="field"><select id="kKinro"><option value="0">なし</option><option value="1">あり</option></select></div></div>
-          <div class="row cnt"><label for="kShogai">障害者（一般）<span class="hint">本人・配偶者・扶養親族の合計人数</span></label><div class="field"><input type="number" id="kShogai" min="0" value="0"><span class="unit">人</span></div></div>
-          <div class="row cnt"><label for="kTokuShogai">特別障害者（同居以外）</label><div class="field"><input type="number" id="kTokuShogai" min="0" value="0"><span class="unit">人</span></div></div>
-          <div class="row cnt"><label for="kDokyoShogai">同居特別障害者</label><div class="field"><input type="number" id="kDokyoShogai" min="0" value="0"><span class="unit">人</span></div></div>
-          <div class="row"><label for="honninShogai">本人が障害者<span class="hint">本人が障害者・寡婦・ひとり親で合計所得135万円以下なら住民税は非課税</span></label><div class="field"><select id="honninShogai"><option value="0">いいえ</option><option value="1">はい</option></select></div></div>
+          <div class="row"><label for="hShogai">本人が障害者<span class="hint" data-s="" data-g="「本人が障害者」の「特別」「その他」欄"></span></label><div class="field"><select id="hShogai"><option value="none">いいえ</option><option value="ippan">障害者</option><option value="toku">特別障害者</option></select></div></div>
+          <div class="row cnt"><label for="sToku">本人以外の特別障害者<span class="hint" data-s="配偶者・扶養親族のうち特別障害者（同居も含めた人数）" data-g="「障害者の数（本人を除く）」の「特別」欄の右側の数字"></span></label><div class="field"><input type="number" id="sToku" min="0" value="0"><span class="unit">人</span></div></div>
+          <div class="row cnt"><label for="sDokyo">うち同居<span class="hint" data-s="上のうち、本人・配偶者・本人と生計を一にする親族と同居している人" data-g="「特別」欄の「内」の数字"></span></label><div class="field"><input type="number" id="sDokyo" min="0" value="0"><span class="unit">人</span></div></div>
+          <div class="row cnt"><label for="sSonota">本人以外のその他の障害者<span class="hint" data-s="" data-g="「障害者の数（本人を除く）」の「その他」欄"></span></label><div class="field"><input type="number" id="sSonota" min="0" value="0"><span class="unit">人</span></div></div>
+          <div class="check" id="jintekiCheck"></div>
 
-          <p class="group-label">生命保険料・地震保険料（支払保険料：申告書の第二表／源泉徴収票「生命保険料の金額の内訳」）</p>
-          <div class="row"><label for="pSeimeiShin">新生命保険料</label><div class="field"><input type="number" id="pSeimeiShin" min="0" value="0"><span class="unit">円</span></div></div>
-          <div class="row"><label for="pSeimeiKyu">旧生命保険料</label><div class="field"><input type="number" id="pSeimeiKyu" min="0" value="0"><span class="unit">円</span></div></div>
-          <div class="row"><label for="pNenkinShin">新個人年金保険料</label><div class="field"><input type="number" id="pNenkinShin" min="0" value="0"><span class="unit">円</span></div></div>
-          <div class="row"><label for="pNenkinKyu">旧個人年金保険料</label><div class="field"><input type="number" id="pNenkinKyu" min="0" value="0"><span class="unit">円</span></div></div>
-          <div class="row"><label for="pKaigo">介護医療保険料</label><div class="field"><input type="number" id="pKaigo" min="0" value="0"><span class="unit">円</span></div></div>
-          <div class="row"><label for="kJishin">地震保険料控除<span class="hint">申告書⑯／源泉徴収票「地震保険料の控除額」</span></label><div class="field"><input type="number" id="kJishin" min="0" value="0"><span class="unit">円</span></div></div>
+          <p class="group-label">生命保険料・地震保険料<span class="hint" style="display:block;font-weight:400;" data-s="第二表 ⑮⑯「保険料控除等に関する事項」の支払保険料（上から順）" data-g="源泉徴収票の中段「生命保険料の金額の内訳」（左から順）"></span></p>
+          <div id="lifeRows">
+            <div class="row" data-ord-s="1" data-ord-g="1"><label for="pSeimeiShin">新生命保険料<span class="hint" data-s="" data-g="「新生命保険料の金額」"></span></label><div class="field"><input type="number" id="pSeimeiShin" min="0" value="0"><span class="unit">円</span></div></div>
+            <div class="row" data-ord-s="2" data-ord-g="2"><label for="pSeimeiKyu">旧生命保険料<span class="hint" data-s="" data-g="「旧生命保険料の金額」"></span></label><div class="field"><input type="number" id="pSeimeiKyu" min="0" value="0"><span class="unit">円</span></div></div>
+            <div class="row" data-ord-s="3" data-ord-g="4"><label for="pNenkinShin">新個人年金保険料<span class="hint" data-s="" data-g="「新個人年金保険料の金額」"></span></label><div class="field"><input type="number" id="pNenkinShin" min="0" value="0"><span class="unit">円</span></div></div>
+            <div class="row" data-ord-s="4" data-ord-g="5"><label for="pNenkinKyu">旧個人年金保険料<span class="hint" data-s="" data-g="「旧個人年金保険料の金額」"></span></label><div class="field"><input type="number" id="pNenkinKyu" min="0" value="0"><span class="unit">円</span></div></div>
+            <div class="row" data-ord-s="5" data-ord-g="3"><label for="pKaigo">介護医療保険料<span class="hint" data-s="" data-g="「介護医療保険料の金額」"></span></label><div class="field"><input type="number" id="pKaigo" min="0" value="0"><span class="unit">円</span></div></div>
+          </div>
+          <div class="row"><label for="kJishin">地震保険料控除<span class="hint" data-s="第一表 ⑯" data-g="「地震保険料の控除額」"></span></label><div class="field"><input type="number" id="kJishin" min="0" value="0"><span class="unit">円</span></div></div>
           <div class="check" id="hokenCheck"></div>
         </div>
       </details>
@@ -236,9 +245,9 @@
         <div class="inner">
           <div class="row"><label for="furusato">ふるさと納税の寄附額<span class="hint" id="furusatoHint">申告書第二表「寄附金控除に関する事項」の金額（都道府県・市区町村への寄附）</span></label><div class="field"><input type="number" id="furusato" min="0" value="0"><span class="unit">円</span></div></div>
           <div class="row" id="kKifuRow"><label for="kKifu">㉙ 寄附金控除<span class="hint">自動計算（寄附額 − 2,000円）。ふるさと納税以外の寄附もあるときだけ入力</span></label><div class="field"><input type="number" id="kKifu" min="0" value="" placeholder="自動"><span class="unit">円</span></div></div>
-          <div class="row"><label for="loanUsed">住宅借入金等特別控除<span class="hint">所得税で引いた額。申告書㉟／源泉徴収票「住宅借入金等特別控除の額」</span></label><div class="field"><input type="number" id="loanUsed" min="0" value="0"><span class="unit">円</span></div></div>
-          <div class="row"><label for="loanKano">住宅ローン控除の控除可能額<span class="hint">申告書は計算明細書の控除額／源泉徴収票「住宅借入金等特別控除可能額」</span></label><div class="field"><input type="number" id="loanKano" min="0" value="0"><span class="unit">円</span></div></div>
-          <div class="row"><label for="loanKikan">入居した時期<span class="hint">住民税から引ける上限が変わります</span></label><div class="field"><select id="loanKikan">
+          <div class="row"><label for="loanUsed">住宅借入金等特別控除の額<span class="hint" data-s="所得税で引いた額。第一表 ㉟「住宅借入金等特別控除」" data-g="「住宅借入金等特別控除の額」"></span></label><div class="field"><input type="number" id="loanUsed" min="0" value="0"><span class="unit">円</span></div></div>
+          <div class="row"><label for="loanKano">住宅ローン控除の控除可能額<span class="hint" data-s="（特定増改築等）住宅借入金等特別控除額の計算明細書で求めた控除額（所得税で引ききれなかった分を含む額）" data-g="「住宅借入金等特別控除可能額」（引ききれなかったときだけ印字されます。空欄なら上と同じ額）"></span></label><div class="field"><input type="number" id="loanKano" min="0" value="0"><span class="unit">円</span></div></div>
+          <div class="row"><label for="loanKikan">入居した時期<span class="hint" data-s="計算明細書の「居住開始年月日」。住民税から引ける上限が変わります" data-g="「居住開始年月日（1回目）」。住民税から引ける上限が変わります"></span></label><div class="field"><select id="loanKikan">
             <option value="r4">令和4年1月以降（上限：課税所得の5%・9.75万円）</option>
             <option value="h26">平成26年4月〜令和3年12月（7%・13.65万円）</option>
             <option value="h21">平成21年1月〜平成26年3月（5%・9.75万円）</option>
@@ -252,6 +261,12 @@
         <span id="saveStatus">入力内容はこのブラウザに自動で保存されます</span>
         <button type="button" id="clearBtn" style="border:none;background:none;color:var(--accent);font-size:12px;cursor:pointer;text-decoration:underline;font-family:inherit;">入力をクリア</button>
       </div>
+      <div class="file-box" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+        <button type="button" id="jsonSaveBtn" class="pdf-btn secondary" style="flex:1 1 150px;padding:9px;font-size:13px;">入力をファイルに保存</button>
+        <button type="button" id="jsonOpenBtn" class="pdf-btn secondary" style="flex:1 1 150px;padding:9px;font-size:13px;">保存したファイルを開く</button>
+        <input type="file" id="jsonFile" accept=".json,application/json" style="display:none;">
+      </div>
+      <p style="font-size:11px;color:#8B8F86;margin:6px 0 0;">お客様ごとに保存できます（ファイル名：宛名＋日付）。開くと、保存したときの入力に置き換わります。</p>
     </div>
 
     <div class="panel result-panel">
@@ -270,7 +285,7 @@
     </div>
   </div>
 
-  <p class="note" id="disclaimerText">確定申告書（または源泉徴収票から求めた）所得税の課税所得に、住民税では所得税より小さくなる控除の分（基礎・配偶者・扶養・寡婦・ひとり親・勤労学生・障害者・生命保険料・地震保険料・寄附金の各控除）を足し戻して住民税の課税所得を求め、10%（市民税6%・県民税4%）を掛けて調整控除・税額控除を差し引き、均等割（兵庫県内5,800円）を加えた概算です。申告年分の翌年度の住民税を計算します。特定親族特別控除、配当控除、ふるさと納税以外の寄附金税額控除、分離課税の所得は反映していません。源泉徴収票から計算する場合、ふるさと納税はワンストップ特例を使った前提です。未成年者の非課税判定は反映していません。市民税・県民税を別々に端数処理するため、実際の額と数百円ずれることがあります。正式な額は住民税決定通知書でご確認ください。</p>
+  <p class="note" id="disclaimerText">確定申告書（または源泉徴収票から求めた）所得税の課税所得に、住民税では所得税より小さくなる控除の分（基礎・配偶者・扶養・特定親族特別・寡婦・ひとり親・勤労学生・障害者・生命保険料・地震保険料・寄附金の各控除）を足し戻して住民税の課税所得を求め、10%（市民税6%・県民税4%）を掛けて調整控除・税額控除を差し引き、均等割（兵庫県内5,800円）を加えた概算です。申告年分の翌年度の住民税を計算します。配当控除、ふるさと納税以外の寄附金税額控除、分離課税の所得は反映していません。源泉徴収票から計算する場合、ふるさと納税はワンストップ特例を使った前提です。未成年者の非課税判定は反映していません。市民税・県民税を別々に端数処理するため、実際の額と数百円ずれることがあります。正式な額は住民税決定通知書でご確認ください。</p>
 </div>
 
 <div id="reportHost"><div id="report"></div></div>
@@ -287,7 +302,9 @@ const P = {
   配偶者: { 所得税: { 一般:{c900:380000,c950:260000,c1000:130000}, 老人:{c900:480000,c950:320000,c1000:160000} },
            住民税: { 一般:{c900:330000,c950:220000,c1000:110000}, 老人:{c900:380000,c950:260000,c1000:130000} } },
   扶養: { 所得税:{ippan:380000,tokutei:630000,rojin:480000,dokyo:580000}, 住民税:{ippan:330000,tokutei:450000,rojin:380000,dokyo:450000} },
-  人的控除差: { 基礎:50000, 配偶者一般:50000, 配偶者老人:100000, ippan:50000, tokutei:180000, rojin:100000, dokyo:130000 },
+  // 調整控除の人的控除差（令和8年度以降）。配偶者控除は本人の合計所得（900万以下／950万以下／1000万以下）で変わる。配偶者特別控除・特定親族特別控除は差なし
+  人的控除差: { 基礎:50000, 配偶者一般:{c900:50000,c950:40000,c1000:20000}, 配偶者老人:{c900:100000,c950:60000,c1000:30000}, ippan:50000, tokutei:180000, rojin:100000, dokyo:130000 },
+  同一生計配偶者_所得上限: 580000, 配偶者特別_所得上限: 1330000, 特定親族_住民税上限: 450000,
   生命: {
     所得税: { 新: [[20000,1,0],[40000,0.5,10000],[80000,0.25,20000],[Infinity,0,40000]], 旧: [[25000,1,0],[50000,0.5,12500],[100000,0.25,25000],[Infinity,0,50000]], 併用上限: 40000, 合計上限: 120000 },
     住民税: { 新: [[12000,1,0],[32000,0.5,6000],[56000,0.25,14000],[Infinity,0,28000]], 旧: [[15000,1,0],[40000,0.5,7500],[70000,0.25,17500],[Infinity,0,35000]], 併用上限: 28000, 合計上限: 70000 },
@@ -309,11 +326,18 @@ function seimeiOne(x, t){ if(x<=0) return 0; const [, r, add] = t.find(([u]) => 
 function seimeiKubun(s, k, t){ const a = seimeiOne(s,t.新), b = seimeiOne(k,t.旧); return (s>0&&k>0) ? Math.max(b, Math.min(a+b, t.併用上限)) : a+b; }
 function seimei(h, kind){ const t = P.生命[kind]; return Math.min(seimeiKubun(h.sShin,h.sKyu,t) + seimeiKubun(h.nShin,h.nKyu,t) + seimeiOne(h.kaigo,t.新), t.合計上限); }
 function col(g){ return g<=9000000 ? 'c900' : g<=9500000 ? 'c950' : g<=10000000 ? 'c1000' : null; }
-function haigusha(amount, g){
-  const c = col(g); if(!c || amount<=0) return { j:0, kubun:null };
-  if(amount === P.配偶者.所得税.老人[c]) return { j:P.配偶者.住民税.老人[c], kubun:'老人' };
-  if(amount === P.配偶者.所得税.一般[c]) return { j:P.配偶者.住民税.一般[c], kubun:'一般' };
-  return { j: Math.min(amount, P.配偶者.住民税.一般[c]), kubun:'特別' };
+// 配偶者の区分と住民税の控除額。配偶者の合計所得がわかればそれで判定、なければ控除額から推定
+function haigusha(amount, g, spouse, rojin){
+  const c = col(g);
+  const doitsu = spouse != null ? spouse <= P.同一生計配偶者_所得上限 : null; // 非課税判定の人数に入るか
+  if(!c || amount<=0) return { j:0, kubun:null, doitsu: !!doitsu };
+  let kubun;
+  if(spouse != null) kubun = spouse <= P.同一生計配偶者_所得上限 ? (rojin ? '老人' : '一般') : '特別';
+  else if(amount === P.配偶者.所得税.老人[c]) kubun = '老人';
+  else if(amount === P.配偶者.所得税.一般[c]) kubun = rojin ? '老人' : '一般';
+  else kubun = '特別';
+  const j = kubun==='特別' ? Math.min(amount, P.配偶者.住民税.一般[c]) : P.配偶者.住民税[kubun][c];
+  return { j, kubun, c, doitsu: doitsu != null ? doitsu : kubun !== '特別' };
 }
 
 function calc(i){
@@ -322,7 +346,7 @@ function calc(i){
   // 控除の差（所得税 − 住民税）
   const kisoT = i.kKiso != null ? i.kKiso : look(P.基礎控除_所得税[i.nenbun], g);
   const kisoJ = look(P.基礎控除_住民税, g);
-  const hai = haigusha(i.kHaigusha, g);
+  const hai = haigusha(i.kHaigusha, g, i.haiShotoku, i.haiRojin);
   const F = i.fuyo, FT = P.扶養.所得税, FJ = P.扶養.住民税;
   const fuyoSa = F.ippan*(FT.ippan-FJ.ippan) + F.tokutei*(FT.tokutei-FJ.tokutei) + F.rojin*(FT.rojin-FJ.rojin) + F.dokyo*(FT.dokyo-FJ.dokyo);
   const seimeiT = seimei(i.hoken,'所得税'), seimeiJ = seimei(i.hoken,'住民税');
@@ -336,6 +360,7 @@ function calc(i){
   const pairs = {
     基礎控除: [kisoT, kisoJ],
     '配偶者（特別）控除': [i.kHaigusha, Math.min(i.kHaigusha, hai.j)],
+    特定親族特別控除: [i.kTokushin, Math.min(i.kTokushin, P.特定親族_住民税上限)],
     扶養控除: [F.ippan*FT.ippan + F.tokutei*FT.tokutei + F.rojin*FT.rojin + F.dokyo*FT.dokyo, F.ippan*FJ.ippan + F.tokutei*FJ.tokutei + F.rojin*FJ.rojin + F.dokyo*FJ.dokyo],
     生命保険料控除: [seimeiT, seimeiJ],
     地震保険料控除: [i.kJishin, jishinJ],
@@ -349,7 +374,7 @@ function calc(i){
   const kazeiJ = chopSen(i.kazei + saTotal);
 
   // 非課税判定
-  const ninzu = 1 + (hai.kubun==='一般'||hai.kubun==='老人' ? 1 : 0) + F.ippan + F.tokutei + F.rojin + F.dokyo + F.nensho;
+  const ninzu = 1 + (hai.doitsu ? 1 : 0) + F.ippan + F.tokutei + F.rojin + F.dokyo + F.nensho;
   const NK = P.非課税, ari = ninzu > 1;
   const hi135 = (i.kafu !== 'none' || i.honninShogai) && g <= P.非課税_135万;
   const kintouHi = hi135 || g <= NK.一人当たり*ninzu + NK.加算 + (ari ? NK.均等割加算 : 0);
@@ -358,8 +383,8 @@ function calc(i){
   // 人的控除差（調整控除・ふるさと特例分の税率判定用）
   const D = P.人的控除差;
   let jinteki = g <= 25000000 ? D.基礎 : 0;
-  if(hai.kubun==='一般') jinteki += D.配偶者一般;
-  if(hai.kubun==='老人') jinteki += D.配偶者老人;
+  if(hai.kubun==='一般') jinteki += D.配偶者一般[hai.c];
+  if(hai.kubun==='老人') jinteki += D.配偶者老人[hai.c];
   jinteki += F.ippan*D.ippan + F.tokutei*D.tokutei + F.rojin*D.rojin + F.dokyo*D.dokyo;
   const DA = P.人的控除差_追加;
   jinteki += (DA[i.kafu]||0) + (i.kinro?DA.勤労学生:0) + i.shogai*DA.障害者 + i.tokuShogai*DA.特別 + i.dokyoShogai*DA.同居特別;
@@ -411,7 +436,14 @@ function applySrcMode(){
   $('srcShinkoku').style.display = g ? 'none' : 'block';
   $('srcGensen').style.display = g ? 'block' : 'none';
   $('kKifuRow').style.display = g ? 'none' : 'flex';
-  $('furusatoHint').textContent = g ? 'ワンストップ特例で寄附した合計額（都道府県・市区町村への寄附）' : '申告書第二表「寄附金控除に関する事項」の金額（都道府県・市区町村への寄附）';
+  $('furusatoHint').textContent = g ? 'ワンストップ特例で寄附した合計額（都道府県・市区町村への寄附）' : '第二表 下段「住民税に関する事項」の寄附金税額控除（都道府県・市区町村分）の金額';
+  const key = g ? 'g' : 's';
+  document.querySelectorAll('[data-s],[data-g]').forEach(el=>{
+    const t = el.dataset[key] || '';
+    el.textContent = t; el.style.display = t ? (el.closest('.group-label') ? 'block' : '') : 'none';
+  });
+  const box = $('lifeRows');
+  [...box.children].sort((a,b)=> (+a.dataset['ord'+key.toUpperCase()]||0) - (+b.dataset['ord'+key.toUpperCase()]||0)).forEach(el=>box.appendChild(el));
 }
 $('srcToggle').addEventListener('click', e=>{
   const b = e.target.closest('button'); if(!b) return;
@@ -424,16 +456,39 @@ function readInputs(){
     goukei: srcMode()==='gensen' ? n('gKyuyo') : n('goukei'),
     kazei: srcMode()==='gensen' ? chopSen(Math.max(0, n('gKyuyo') - n('gKoujo'))) : n('kazei'),
     gKyuyo: n('gKyuyo'), gKoujo: n('gKoujo'),
-    kafu: $('kKafu').value, kinro: $('kKinro').value==='1', shogai: n('kShogai'), tokuShogai: n('kTokuShogai'), dokyoShogai: n('kDokyoShogai'), honninShogai: $('honninShogai').value==='1',
+    kafu: $('kKafu').value, kinro: $('kKinro').value==='1',
+    // 源泉徴収票の並び（本人／本人以外の特別「内」同居／その他）を、控除の区分（一般・特別・同居特別）に直す
+    shogai: ($('hShogai').value==='ippan'?1:0) + n('sSonota'),
+    tokuShogai: ($('hShogai').value==='toku'?1:0) + Math.max(0, n('sToku') - n('sDokyo')),
+    dokyoShogai: Math.min(n('sDokyo'), n('sToku')),
+    honninShogai: $('hShogai').value!=='none',
+    haiShotoku: nOrNull('haiShotoku'), haiRojin: $('haiRojin').value==='1', kTokushin: n('kTokushin'),
     loanKikan: $('loanKikan').value,
-    kHaigusha: n('kHaigusha'), fuyo: { ippan:n('fIppan'), tokutei:n('fTokutei'), rojin:n('fRojin'), dokyo:n('fDokyo'), nensho:n('fNensho') },
+    kHaigusha: n('kHaigusha'), fuyo: { ippan:n('fIppan'), tokutei:n('fTokutei'), rojin:Math.max(0, n('fRojinAll') - n('fDokyoUchi')), dokyo:Math.min(n('fDokyoUchi'), n('fRojinAll')), nensho:n('fNensho') },
     hoken: { sShin:n('pSeimeiShin'), sKyu:n('pSeimeiKyu'), nShin:n('pNenkinShin'), nKyu:n('pNenkinKyu'), kaigo:n('pKaigo') }, kJishin: n('kJishin'),
     furusato: n('furusato'), kKifu: nOrNull('kKifu'), loanUsed: n('loanUsed'), loanKano: n('loanKano'),
   };
 }
 function liveCheck(){
   const i = readInputs();
-  $('hokenCheck').innerHTML = `<div class="crow"><span>⑮ 生命保険料控除（計算値）→ 申告書と一致するか確認</span><span>${yen(seimei(i.hoken,'所得税'))} 円</span></div>`;
+  const sh = i.mode==='shinkoku';
+  $('hokenCheck').innerHTML = `<div class="crow"><span>生命保険料控除（計算値）→ ${sh?'第一表 ⑮':'源泉徴収票「生命保険料の控除額」'}と一致するか確認</span><span>${yen(seimei(i.hoken,'所得税'))} 円</span></div>`;
+  const FT = P.扶養.所得税, SG = P.障害者等;
+  const fuyoT = i.fuyo.ippan*FT.ippan + i.fuyo.tokutei*FT.tokutei + i.fuyo.rojin*FT.rojin + i.fuyo.dokyo*FT.dokyo;
+  const kafuT = P.寡婦等[i.kafu][0];
+  const shoT = (i.kinro?SG.勤労学生[0]:0) + i.shogai*SG.障害者[0] + i.tokuShogai*SG.特別[0] + i.dokyoShogai*SG.同居特別[0];
+  const cr = (a,b)=>`<div class="crow"><span>${a}</span><span>${yen(b)} 円</span></div>`;
+  let jc = '';
+  if(sh){
+    jc += cr('扶養控除（計算値）→ 第一表 ㉓と一致するか確認', fuyoT);
+    if(kafuT) jc += cr('寡婦・ひとり親控除（計算値）→ 第一表 ⑰⑱', kafuT);
+    if(shoT) jc += cr('勤労学生・障害者控除（計算値）→ 第一表 ⑲⑳', shoT);
+  }
+  if(n('fDokyoUchi') > n('fRojinAll')) jc += '<div class="crow" style="color:var(--warn-text)"><span>⚠ 同居老親等の人数が老人の人数より多くなっています</span><span></span></div>';
+  if(n('sDokyo') > n('sToku')) jc += '<div class="crow" style="color:var(--warn-text)"><span>⚠ 同居の特別障害者が特別障害者の人数より多くなっています</span><span></span></div>';
+  if(i.haiShotoku != null && i.kHaigusha === 0 && i.haiShotoku <= P.配偶者特別_所得上限 && i.goukei <= 10000000) jc += '<div class="crow" style="color:var(--warn-text)"><span>⚠ 配偶者の合計所得が入っていますが、配偶者（特別）控除の額が0円です</span><span></span></div>';
+  $('jintekiCheck').innerHTML = jc;
+  $('jintekiCheck').style.display = jc ? '' : 'none';
   const kisoAuto = look(P.基礎控除_所得税[i.nenbun], i.goukei);
   $('kKiso').placeholder = `自動：${yen(kisoAuto)}`;
   const kifuAuto = i.furusato > 2000 ? Math.max(0, Math.min(i.furusato, Math.floor(i.goukei*0.4)) - 2000) : 0;
@@ -591,6 +646,43 @@ document.querySelectorAll('details.opt').forEach(d=>{
   if([...d.querySelectorAll('input')].some(el=>el.value.trim()!=='' && el.value!=='0')) d.open = true;
 });
 applySrcMode(); liveCheck();
+
+// ===== お客様ごとの入力をファイル（JSON）に保存・読み込み =====
+const TOOL_ID = 'juminzei-keisan', TOOL_NAME = '住民税かんたん計算', TOOL_COMPAT = ['furusato-jougen'], TOOL_NAMES = {'tedori-shindan':'手取り診断','juminzei-keisan':'住民税かんたん計算','furusato-jougen':'ふるさと納税 上限かんたん計算'};
+document.getElementById('jsonSaveBtn').addEventListener('click', ()=>{
+  if(!document.getElementById('atena').value.trim() && !confirm('宛名が空欄です。ファイル名に名前が入りませんが、保存しますか？\n（名前を入れる場合は「キャンセル」を押して、PDF欄の宛名に入力してください）')){ document.getElementById('atena').focus(); return; }
+  const data = { tool: TOOL_ID, toolName: TOOL_NAME, version: 1, atena: document.getElementById('atena').value.trim(), ...snapshot() };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = pdfFileName().replace(/\.pdf$/, '.json');
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  document.getElementById('saveStatus').textContent = `「${a.download}」を保存しました`;
+});
+document.getElementById('jsonOpenBtn').addEventListener('click', ()=> document.getElementById('jsonFile').click());
+document.getElementById('jsonFile').addEventListener('change', async e=>{
+  const file = e.target.files[0]; e.target.value = '';
+  if(!file) return;
+  let data;
+  try{ data = JSON.parse(await file.text()); }catch(err){ alert('ファイルを読み込めませんでした。このツールで保存したJSONファイルを選んでください。'); return; }
+  if(!data || typeof data !== 'object' || !data.fields){ alert('このツールで保存したファイルではないようです。'); return; }
+  if(data.tool && data.tool !== TOOL_ID){
+    const from = TOOL_NAMES[data.tool] || data.tool;
+    if(!TOOL_COMPAT.includes(data.tool)){ alert(`このファイルは「${from}」で保存したものです。そちらのツールで開いてください。`); return; }
+    if(!confirm(`このファイルは「${from}」で保存したものです。共通の項目だけ読み込みますか？`)) return;
+  }
+  if(!confirm(`「${file.name}」を開きます。いま入っている入力は置き換わります。よろしいですか？`)) return;
+  try{
+    localStorage.setItem(STORE_KEY, JSON.stringify({ fields: data.fields, toggles: data.toggles || {}, kodomo: data.kodomo, oya: data.oya, savedAt: data.savedAt }));
+    sessionStorage.setItem(STORE_KEY + ':opened', file.name);
+  }catch(err){ alert('このブラウザでは読み込めませんでした（保存領域が使えない設定です）。'); return; }
+  window.removeEventListener('pagehide', saveState);
+  location.reload();
+});
+(function(){
+  let opened = null; try{ opened = sessionStorage.getItem(STORE_KEY + ':opened'); sessionStorage.removeItem(STORE_KEY + ':opened'); }catch(e){}
+  if(opened) document.getElementById('saveStatus').textContent = `「${opened}」を開きました`;
+})();
 </script>
 </body>
 </html>
